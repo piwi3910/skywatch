@@ -30,6 +30,7 @@
     <ProjectReference Include="..\..\src\SkyWatch.Safety\SkyWatch.Safety.csproj" />
     <ProjectReference Include="..\..\src\SkyWatch.Vision\SkyWatch.Vision.csproj" />
     <ProjectReference Include="..\..\src\SkyWatch.Capture\SkyWatch.Capture.csproj" />
+    <ProjectReference Include="..\..\src\SkyWatch.Alpaca\SkyWatch.Alpaca.csproj" />
   </ItemGroup>
 
 </Project>
