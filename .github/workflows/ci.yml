@@ -21,6 +21,16 @@ jobs:
         with:
           dotnet-version: 8.0.x
 
+      - name: Install OpenCV native dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libtesseract-dev libleptonica-dev
+          # OpenCvSharpExtern.so links against libtesseract.so.4; Ubuntu 24.04 ships .so.5
+          if [ ! -f /usr/lib/x86_64-linux-gnu/libtesseract.so.4 ] && [ -f /usr/lib/x86_64-linux-gnu/libtesseract.so.5 ]; then
+            sudo ln -s /usr/lib/x86_64-linux-gnu/libtesseract.so.5 /usr/lib/x86_64-linux-gnu/libtesseract.so.4
+          fi
+
       - name: Restore
         run: dotnet restore SkyWatch.sln
 
