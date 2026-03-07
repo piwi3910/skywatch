@@ -12,6 +12,10 @@ public sealed class FrameData
 
     public required int Channels { get; init; }
 
+    public required int BitsPerChannel { get; init; }
+
+    public required string PixelFormat { get; init; }
+
     public required DateTimeOffset CapturedAt { get; init; }
 
     public required FrameSourceType SourceType { get; init; }

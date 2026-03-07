@@ -33,6 +33,8 @@ public sealed class MatConverterTests
             Width = 90,
             Height = 60,
             Channels = 3,
+            BitsPerChannel = 8,
+            PixelFormat = "BGR24",
             CapturedAt = DateTimeOffset.UtcNow,
             SourceType = FrameSourceType.Replay,
         };

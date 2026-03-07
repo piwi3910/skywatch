@@ -206,6 +206,8 @@ public sealed class FrameSourceManagerTests : IAsyncDisposable
             Width = 100,
             Height = 100,
             Channels = 3,
+            BitsPerChannel = 8,
+            PixelFormat = "BGR24",
             CapturedAt = DateTimeOffset.UtcNow,
             SourceType = FrameSourceType.Replay,
         };

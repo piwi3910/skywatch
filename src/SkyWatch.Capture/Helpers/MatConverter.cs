@@ -21,12 +21,31 @@ public static class MatConverter
 
         Cv2.ImEncode(".png", mat, out var imageBytes);
 
+        int bitsPerChannel = mat.Depth() switch
+        {
+            MatType.CV_8U => 8,
+            MatType.CV_16U => 16,
+            _ => 8,
+        };
+
+        string pixelFormat = (mat.Channels(), bitsPerChannel) switch
+        {
+            (1, 8) => "Mono8",
+            (1, 16) => "Mono16",
+            (3, 8) => "BGR24",
+            (3, 16) => "BGR48",
+            (4, 8) => "BGRA32",
+            _ => $"Unknown{mat.Channels()}ch{bitsPerChannel}bit",
+        };
+
         return new FrameData
         {
             ImageBytes = imageBytes,
             Width = mat.Width,
             Height = mat.Height,
             Channels = mat.Channels(),
+            BitsPerChannel = bitsPerChannel,
+            PixelFormat = pixelFormat,
             CapturedAt = DateTimeOffset.UtcNow,
             SourceType = sourceType,
         };
