@@ -1,10 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="8.*" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="8.*" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\src\SkyWatch.Capture\SkyWatch.Capture.csproj" />
     <ProjectReference Include="..\..\src\SkyWatch.Vision\SkyWatch.Vision.csproj" />
     <ProjectReference Include="..\..\src\SkyWatch.Core\SkyWatch.Core.csproj" />
     <ProjectReference Include="..\..\src\SkyWatch.Contracts\SkyWatch.Contracts.csproj" />
+    <ProjectReference Include="..\..\src\SkyWatch.Safety\SkyWatch.Safety.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
