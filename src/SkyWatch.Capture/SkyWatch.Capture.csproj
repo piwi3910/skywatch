@@ -26,7 +26,7 @@
   </ItemGroup>
 
   <ItemGroup Condition="$([MSBuild]::IsOSPlatform('Windows'))">
-    <PackageReference Include="ASCOM.DriverAccess" Version="7.*" />
+    <PackageReference Include="ASCOM.Com.Components" Version="2.*" />
   </ItemGroup>
 
 </Project>
