@@ -27,4 +27,25 @@ public sealed class CaptureSettings
     public bool FlipVertical { get; set; }
 
     public int RotationDegrees { get; set; }
+
+    // Alpaca connection settings
+    public string AlpacaHost { get; set; } = string.Empty;
+
+    public int AlpacaPort { get; set; } = 11111;
+
+    public int AlpacaDeviceNumber { get; set; }
+
+    // ASCOM COM settings
+    public string AscomProgId { get; set; } = string.Empty;
+
+    // Exposure settings (shared by Alpaca and ASCOM cameras)
+    public double ExposureDuration { get; set; } = 2.0;
+
+    public bool AutoExposure { get; set; }
+
+    public double AutoExposureTarget { get; set; } = 128.0;
+
+    public double ExposureMin { get; set; } = 0.1;
+
+    public double ExposureMax { get; set; } = 30.0;
 }

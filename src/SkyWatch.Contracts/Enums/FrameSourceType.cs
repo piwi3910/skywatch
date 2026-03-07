@@ -13,4 +13,10 @@ public enum FrameSourceType
 
     /// <summary>Replay of previously captured frames.</summary>
     Replay,
+
+    /// <summary>A camera connected via ASCOM Alpaca REST API.</summary>
+    AlpacaCamera,
+
+    /// <summary>A camera connected via ASCOM COM (Windows only).</summary>
+    AscomCamera,
 }
