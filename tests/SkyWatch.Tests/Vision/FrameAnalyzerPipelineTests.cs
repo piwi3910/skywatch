@@ -58,6 +58,8 @@ public sealed class FrameAnalyzerPipelineTests
             Width = 100,
             Height = 100,
             Channels = 3,
+            BitsPerChannel = 8,
+            PixelFormat = "BGR24",
             CapturedAt = DateTimeOffset.UtcNow,
             SourceType = FrameSourceType.Replay,
         };
@@ -112,6 +114,8 @@ public sealed class FrameAnalyzerPipelineTests
             Width = mat.Width,
             Height = mat.Height,
             Channels = mat.Channels(),
+            BitsPerChannel = 8,
+            PixelFormat = "BGR24",
             CapturedAt = DateTimeOffset.UtcNow,
             SourceType = FrameSourceType.Replay,
         };
