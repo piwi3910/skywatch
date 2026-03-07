@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <ItemGroup>
+    <ProjectReference Include="..\SkyWatch.Contracts\SkyWatch.Contracts.csproj" />
+    <ProjectReference Include="..\SkyWatch.Core\SkyWatch.Core.csproj" />
+    <ProjectReference Include="..\SkyWatch.Capture\SkyWatch.Capture.csproj" />
+    <ProjectReference Include="..\SkyWatch.Vision\SkyWatch.Vision.csproj" />
+    <ProjectReference Include="..\SkyWatch.Safety\SkyWatch.Safety.csproj" />
+    <ProjectReference Include="..\SkyWatch.Alpaca\SkyWatch.Alpaca.csproj" />
+    <ProjectReference Include="..\SkyWatch.Web\SkyWatch.Web.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+</Project>
