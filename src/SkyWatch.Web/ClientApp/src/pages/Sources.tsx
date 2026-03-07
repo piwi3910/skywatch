@@ -22,6 +22,15 @@ const defaultSettings: CaptureSettings = {
   flipHorizontal: false,
   flipVertical: false,
   rotationDegrees: 0,
+  alpacaHost: '',
+  alpacaPort: 11111,
+  alpacaDeviceNumber: 0,
+  ascomProgId: '',
+  exposureDuration: 2.0,
+  autoExposure: false,
+  autoExposureTarget: 128,
+  exposureMin: 0.1,
+  exposureMax: 30.0,
 };
 
 export default function Sources() {
@@ -99,6 +108,13 @@ export default function Sources() {
           color={connectionColor as 'success' | 'warning' | 'error' | 'default'}
           size="small"
         />
+        {captureStatus?.autoExposureEnabled && captureStatus.currentExposureDuration != null && (
+          <Chip
+            label={`Exposure: ${captureStatus.currentExposureDuration.toFixed(2)}s`}
+            size="small"
+            variant="outlined"
+          />
+        )}
       </Stack>
 
       {captureStatus?.errorMessage && (
@@ -124,6 +140,8 @@ export default function Sources() {
                   <MenuItem value="UsbCamera">USB Camera</MenuItem>
                   <MenuItem value="Rtsp">RTSP Stream</MenuItem>
                   <MenuItem value="Replay">Replay</MenuItem>
+                  <MenuItem value="AlpacaCamera">Alpaca Camera</MenuItem>
+                  <MenuItem value="AscomCamera">ASCOM Camera (Windows)</MenuItem>
                 </Select>
               </FormControl>
             </CardContent>
@@ -218,10 +236,85 @@ export default function Sources() {
                     </Grid>
                   </>
                 )}
+
+                {settings.sourceType === 'AlpacaCamera' && (
+                  <>
+                    <Grid size={{ xs: 12, sm: 4 }}>
+                      <TextField fullWidth label="Alpaca Host" value={settings.alpacaHost}
+                        onChange={(e) => update('alpacaHost', e.target.value)} placeholder="192.168.1.100" />
+                    </Grid>
+                    <Grid size={{ xs: 12, sm: 4 }}>
+                      <TextField fullWidth label="Alpaca Port" type="number" value={settings.alpacaPort}
+                        onChange={(e) => update('alpacaPort', Number(e.target.value))}
+                        slotProps={{ htmlInput: { min: 1, max: 65535 } }} />
+                    </Grid>
+                    <Grid size={{ xs: 12, sm: 4 }}>
+                      <TextField fullWidth label="Device Number" type="number" value={settings.alpacaDeviceNumber}
+                        onChange={(e) => update('alpacaDeviceNumber', Number(e.target.value))}
+                        slotProps={{ htmlInput: { min: 0 } }} />
+                    </Grid>
+                  </>
+                )}
+
+                {settings.sourceType === 'AscomCamera' && (
+                  <Grid size={{ xs: 12, sm: 8 }}>
+                    <TextField fullWidth label="ASCOM ProgID" value={settings.ascomProgId}
+                      onChange={(e) => update('ascomProgId', e.target.value)}
+                      placeholder="ASCOM.Simulator.Camera"
+                      helperText="Windows only. Example: ASCOM.Simulator.Camera" />
+                  </Grid>
+                )}
               </Grid>
             </CardContent>
           </Card>
         </Grid>
+
+        {/* Exposure Settings (camera sources only) */}
+        {(settings.sourceType === 'AlpacaCamera' || settings.sourceType === 'AscomCamera') && (
+          <Grid size={12}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6" gutterBottom>Exposure Settings</Typography>
+                <Grid container spacing={2}>
+                  <Grid size={{ xs: 12, sm: 4 }}>
+                    <TextField fullWidth label="Exposure Duration (s)" type="number"
+                      value={settings.exposureDuration}
+                      onChange={(e) => update('exposureDuration', Number(e.target.value))}
+                      slotProps={{ htmlInput: { min: 0.001, step: 0.1 } }} />
+                  </Grid>
+                  <Grid size={{ xs: 12, sm: 4 }}>
+                    <FormControlLabel
+                      control={<Switch checked={settings.autoExposure}
+                        onChange={(e) => update('autoExposure', e.target.checked)} />}
+                      label="Auto-Exposure" />
+                  </Grid>
+                  {settings.autoExposure && (
+                    <>
+                      <Grid size={{ xs: 12, sm: 4 }}>
+                        <TextField fullWidth label="Target Brightness (0-255)" type="number"
+                          value={settings.autoExposureTarget}
+                          onChange={(e) => update('autoExposureTarget', Number(e.target.value))}
+                          slotProps={{ htmlInput: { min: 0, max: 255 } }} />
+                      </Grid>
+                      <Grid size={{ xs: 12, sm: 4 }}>
+                        <TextField fullWidth label="Min Exposure (s)" type="number"
+                          value={settings.exposureMin}
+                          onChange={(e) => update('exposureMin', Number(e.target.value))}
+                          slotProps={{ htmlInput: { min: 0.001, step: 0.1 } }} />
+                      </Grid>
+                      <Grid size={{ xs: 12, sm: 4 }}>
+                        <TextField fullWidth label="Max Exposure (s)" type="number"
+                          value={settings.exposureMax}
+                          onChange={(e) => update('exposureMax', Number(e.target.value))}
+                          slotProps={{ htmlInput: { min: 0.1, step: 1 } }} />
+                      </Grid>
+                    </>
+                  )}
+                </Grid>
+              </CardContent>
+            </Card>
+          </Grid>
+        )}
 
         {/* Common fields */}
         <Grid size={12}>

@@ -1,5 +1,5 @@
 export interface CaptureSettings {
-  sourceType: 'UsbCamera' | 'Rtsp' | 'Replay';
+  sourceType: 'UsbCamera' | 'Rtsp' | 'Replay' | 'AlpacaCamera' | 'AscomCamera';
   sourceIdentifier: string;
   deviceIndex: number;
   frameIntervalSeconds: number;
@@ -11,6 +11,18 @@ export interface CaptureSettings {
   flipHorizontal: boolean;
   flipVertical: boolean;
   rotationDegrees: number;
+  // Alpaca
+  alpacaHost: string;
+  alpacaPort: number;
+  alpacaDeviceNumber: number;
+  // ASCOM COM
+  ascomProgId: string;
+  // Exposure
+  exposureDuration: number;
+  autoExposure: boolean;
+  autoExposureTarget: number;
+  exposureMin: number;
+  exposureMax: number;
 }
 
 export interface ThresholdSettings {
@@ -58,6 +70,9 @@ export interface CaptureStatusInfo {
   sourceDescription: string;
   framesCaptured: number;
   errorMessage: string | null;
+  currentExposureDuration: number | null;
+  autoExposureEnabled: boolean;
+  autoExposureTarget: number | null;
 }
 
 export interface StatusData {
