@@ -9,3 +9,19 @@ publish/
 logs/
 debug-frames/
 profiles/
+
+# Node
+node_modules/
+
+# macOS
+.DS_Store
+
+# IDE
+.idea/
+*.swp
+*.swo
+*~
+
+# Environment
+.env
+.env.*
