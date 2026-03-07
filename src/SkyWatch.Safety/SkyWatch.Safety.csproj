@@ -1,6 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.*" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.*" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\SkyWatch.Contracts\SkyWatch.Contracts.csproj" />
     <ProjectReference Include="..\SkyWatch.Core\SkyWatch.Core.csproj" />
   </ItemGroup>
@@ -10,5 +15,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="SkyWatch.Tests" />
+  </ItemGroup>
 
 </Project>
