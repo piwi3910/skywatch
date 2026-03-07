@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\SkyWatch.Capture\SkyWatch.Capture.csproj" />
+    <ProjectReference Include="..\..\src\SkyWatch.Vision\SkyWatch.Vision.csproj" />
+    <ProjectReference Include="..\..\src\SkyWatch.Core\SkyWatch.Core.csproj" />
+    <ProjectReference Include="..\..\src\SkyWatch.Contracts\SkyWatch.Contracts.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+</Project>
