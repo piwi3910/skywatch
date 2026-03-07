@@ -21,7 +21,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```bash
 dotnet build SkyWatch.sln
 dotnet run --project src/SkyWatch.Host
-dotnet test SkyWatch.sln              # run all tests (130: 122 unit + 8 integration)
+dotnet test SkyWatch.sln              # run all tests (153: 145 unit + 8 integration)
 dotnet test tests/SkyWatch.Tests      # unit tests only
 dotnet test tests/SkyWatch.IntegrationTests  # integration tests only
 dotnet test --filter "FullyQualifiedName~ClassName.MethodName"  # single test
@@ -51,13 +51,13 @@ Frame Source -> FrameSourceManager -> Preprocessing -> Vision Analysis -> Safety
 |---------|------|
 | **SkyWatch.Contracts** | Shared DTOs, interfaces, enums, state models. No dependencies on other projects. |
 | **SkyWatch.Core** | Configuration models, utilities, validation, constants, profile logic. |
-| **SkyWatch.Capture** | Frame source abstraction (`IFrameSource`) and implementations (USB, RTSP, Replay). |
+| **SkyWatch.Capture** | Frame source abstraction (`IFrameSource`) and implementations (USB, RTSP, Replay, `AlpacaCameraFrameSource`, `AscomComCameraFrameSource`). |
 | **SkyWatch.Vision** | Image analysis (`IFrameAnalyzer`): brightness, star count, cloudiness, entropy, edge density, obstruction. |
 | **SkyWatch.Safety** | Rule engine (`ISafetyEvaluator`), hysteresis, debounce, state store. |
 | **SkyWatch.Alpaca** | ASCOM Alpaca SafetyMonitor (and later ObservingConditions) endpoints. |
 | **SkyWatch.Web** | React + MUI SPA: dashboard, live preview via WebSocket (`/ws/live`), settings, threshold tuning. API-first design for N.I.N.A. plugin compatibility. |
 | **SkyWatch.Host** | Application bootstrap, DI wiring (`ServiceRegistration`), background worker (`SkyWatchWorker`). Entry point. |
-| **SkyWatch.Tests** | Unit tests (122 tests). |
+| **SkyWatch.Tests** | Unit tests (145 tests). |
 | **SkyWatch.IntegrationTests** | Integration and API tests (8 tests). |
 | **SkyWatch.Tools.Replay** | Standalone CLI tool for replaying image directories against the analysis pipeline. |
 

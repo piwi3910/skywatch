@@ -14,7 +14,8 @@ Primary deployment targets: Windows PC running [NINA](https://nighttime-imaging.
 
 ## Features
 
-- **Camera support** -- USB webcams, RTSP/IP cameras, image replay mode for testing
+- **Camera support** -- USB webcams, RTSP/IP cameras, ASCOM Alpaca cameras, native ASCOM COM cameras (Windows), image replay mode for testing
+- **Exposure control** -- manual exposure with configurable duration, auto-exposure with target brightness/damping/min-max bounds, 16-bit capture with full bit-depth preservation
 - **Safety metrics** -- brightness, star count, cloudiness, entropy, edge density, obstruction detection
 - **Deterministic safety decision engine** -- configurable hysteresis and debounce; asymmetric timing (fast unsafe, slow safe transitions)
 - **ASCOM Alpaca SafetyMonitor** -- standard HTTP API for NINA and other ASCOM clients
@@ -47,7 +48,7 @@ SkyWatch includes a React + Material UI dark-themed dashboard served by the ASP.
 
 **Pages:**
 - **Dashboard** -- live camera preview, real-time safety status and sky metrics via WebSocket
-- **Sources** -- configure camera source (USB, RTSP, replay)
+- **Sources** -- configure camera source (USB, RTSP, Alpaca Camera, ASCOM Camera, replay)
 - **Thresholds** -- tune per-metric safe/unsafe thresholds
 - **Timing** -- adjust debounce, hysteresis, and warmup durations
 - **Profiles** -- create, switch, and manage configuration profiles
@@ -69,7 +70,7 @@ npm run dev
 # Vite dev server runs at http://localhost:5173 with proxy to backend
 
 # Tests
-dotnet test SkyWatch.sln           # Run all tests (119: 111 unit + 8 integration)
+dotnet test SkyWatch.sln           # Run all tests (153: 145 unit + 8 integration)
 dotnet format SkyWatch.sln         # Fix formatting
 dotnet test --filter "FullyQualifiedName~ClassName.MethodName"  # Single test
 ```
@@ -95,7 +96,7 @@ See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for full usage and options.
 src/
   SkyWatch.Contracts   -- Shared interfaces, DTOs, enums (no external dependencies)
   SkyWatch.Core        -- Configuration models, profile management, utilities
-  SkyWatch.Capture     -- Frame sources: USB webcam, RTSP, replay (OpenCvSharp)
+  SkyWatch.Capture     -- Frame sources: USB webcam, RTSP, Alpaca camera, ASCOM COM camera, replay (OpenCvSharp)
   SkyWatch.Vision      -- Frame analysis pipeline and sky metrics (OpenCvSharp)
   SkyWatch.Safety      -- Safety evaluation engine, hysteresis, state management
   SkyWatch.Alpaca      -- ASCOM Alpaca SafetyMonitor HTTP API and discovery
