@@ -1,4 +1,5 @@
-﻿using SkyWatch.Core.Configuration;
+﻿using SkyWatch.Contracts.Enums;
+using SkyWatch.Core.Configuration;
 
 namespace SkyWatch.Core.Validation;
 
@@ -29,6 +30,45 @@ public static class SettingsValidator
 
         if (settings.Capture.RotationDegrees is not (0 or 90 or 180 or 270))
             errors.Add("Rotation must be 0, 90, 180, or 270 degrees.");
+
+        // Alpaca camera validation
+        if (settings.Capture.SourceType == FrameSourceType.AlpacaCamera)
+        {
+            if (string.IsNullOrWhiteSpace(settings.Capture.AlpacaHost))
+                errors.Add("Alpaca host must not be empty.");
+
+            if (settings.Capture.AlpacaPort is < 1 or > 65535)
+                errors.Add("Alpaca port must be between 1 and 65535.");
+
+            if (settings.Capture.AlpacaDeviceNumber < 0)
+                errors.Add("Alpaca device number must be >= 0.");
+        }
+
+        // ASCOM camera validation
+        if (settings.Capture.SourceType == FrameSourceType.AscomCamera)
+        {
+            if (string.IsNullOrWhiteSpace(settings.Capture.AscomProgId))
+                errors.Add("ASCOM ProgID must not be empty.");
+        }
+
+        // Exposure validation for both camera types
+        if (settings.Capture.SourceType is FrameSourceType.AlpacaCamera or FrameSourceType.AscomCamera)
+        {
+            if (settings.Capture.ExposureDuration <= 0)
+                errors.Add("Exposure duration must be greater than 0.");
+
+            if (settings.Capture.AutoExposure)
+            {
+                if (settings.Capture.AutoExposureTarget is < 0 or > 255)
+                    errors.Add("Auto-exposure target must be between 0 and 255.");
+
+                if (settings.Capture.ExposureMin >= settings.Capture.ExposureMax)
+                    errors.Add("Exposure min must be less than exposure max.");
+
+                if (settings.Capture.ExposureMin < 0)
+                    errors.Add("Exposure min must be >= 0.");
+            }
+        }
 
         // Threshold settings validation
         if (settings.Thresholds.MaxAverageBrightness is < 0 or > 255)

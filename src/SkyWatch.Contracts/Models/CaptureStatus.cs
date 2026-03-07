@@ -15,4 +15,10 @@ public sealed class CaptureStatus
     public int FramesCaptured { get; init; }
 
     public string? ErrorMessage { get; init; }
+
+    public double? CurrentExposureDuration { get; init; }
+
+    public bool AutoExposureEnabled { get; init; }
+
+    public double? AutoExposureTarget { get; init; }
 }

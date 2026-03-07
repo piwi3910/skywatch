@@ -1,4 +1,5 @@
-﻿using SkyWatch.Contracts.Models;
+﻿using SkyWatch.Contracts.Enums;
+using SkyWatch.Contracts.Models;
 using SkyWatch.Core.Configuration;
 using SkyWatch.Core.Validation;
 
@@ -201,5 +202,120 @@ public sealed class SettingsValidatorTests
         var errors = SettingsValidator.Validate(settings);
 
         Assert.True(errors.Count >= 4, $"Expected at least 4 errors but got {errors.Count}");
+    }
+
+    [Fact]
+    public void AlpacaCameraWithEmptyHostReturnsError()
+    {
+        var settings = new ProfileSettings
+        {
+            Capture = new CaptureSettings
+            {
+                SourceType = FrameSourceType.AlpacaCamera,
+                AlpacaHost = string.Empty,
+            },
+        };
+        var errors = SettingsValidator.Validate(settings);
+        Assert.Contains(errors, e => e.Contains("Alpaca host"));
+    }
+
+    [Fact]
+    public void AlpacaCameraWithInvalidPortReturnsError()
+    {
+        var settings = new ProfileSettings
+        {
+            Capture = new CaptureSettings
+            {
+                SourceType = FrameSourceType.AlpacaCamera,
+                AlpacaHost = "localhost",
+                AlpacaPort = -1,
+            },
+        };
+        var errors = SettingsValidator.Validate(settings);
+        Assert.Contains(errors, e => e.Contains("Alpaca port"));
+    }
+
+    [Fact]
+    public void AscomCameraWithEmptyProgIdReturnsError()
+    {
+        var settings = new ProfileSettings
+        {
+            Capture = new CaptureSettings
+            {
+                SourceType = FrameSourceType.AscomCamera,
+                AscomProgId = string.Empty,
+            },
+        };
+        var errors = SettingsValidator.Validate(settings);
+        Assert.Contains(errors, e => e.Contains("ASCOM ProgID"));
+    }
+
+    [Fact]
+    public void ExposureDurationBelowZeroReturnsError()
+    {
+        var settings = new ProfileSettings
+        {
+            Capture = new CaptureSettings
+            {
+                SourceType = FrameSourceType.AlpacaCamera,
+                AlpacaHost = "localhost",
+                ExposureDuration = -1,
+            },
+        };
+        var errors = SettingsValidator.Validate(settings);
+        Assert.Contains(errors, e => e.Contains("Exposure duration"));
+    }
+
+    [Fact]
+    public void AutoExposureMinGreaterThanMaxReturnsError()
+    {
+        var settings = new ProfileSettings
+        {
+            Capture = new CaptureSettings
+            {
+                SourceType = FrameSourceType.AlpacaCamera,
+                AlpacaHost = "localhost",
+                AutoExposure = true,
+                ExposureMin = 10.0,
+                ExposureMax = 5.0,
+            },
+        };
+        var errors = SettingsValidator.Validate(settings);
+        Assert.Contains(errors, e => e.Contains("Exposure min"));
+    }
+
+    [Fact]
+    public void AutoExposureTargetOutOfRangeReturnsError()
+    {
+        var settings = new ProfileSettings
+        {
+            Capture = new CaptureSettings
+            {
+                SourceType = FrameSourceType.AlpacaCamera,
+                AlpacaHost = "localhost",
+                AutoExposure = true,
+                AutoExposureTarget = 300,
+            },
+        };
+        var errors = SettingsValidator.Validate(settings);
+        Assert.Contains(errors, e => e.Contains("Auto-exposure target"));
+    }
+
+    [Fact]
+    public void ValidAlpacaSettingsReturnNoErrors()
+    {
+        var settings = new ProfileSettings
+        {
+            Capture = new CaptureSettings
+            {
+                SourceType = FrameSourceType.AlpacaCamera,
+                AlpacaHost = "192.168.1.100",
+                AlpacaPort = 11111,
+                AlpacaDeviceNumber = 0,
+                ExposureDuration = 2.0,
+            },
+        };
+        var errors = SettingsValidator.Validate(settings);
+        Assert.Empty(errors);
     }
 }
