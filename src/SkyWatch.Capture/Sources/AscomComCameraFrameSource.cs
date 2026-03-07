@@ -26,7 +26,7 @@ public sealed partial class AscomComCameraFrameSource : IFrameSource
     private double currentExposure;
 
 #if WINDOWS
-    private ASCOM.DriverAccess.Camera? camera;
+    private ASCOM.Com.DriverAccess.Camera? camera;
 #endif
 
     /// <summary>
@@ -59,7 +59,7 @@ public sealed partial class AscomComCameraFrameSource : IFrameSource
 
         try
         {
-            camera = new ASCOM.DriverAccess.Camera(settings.AscomProgId);
+            camera = new ASCOM.Com.DriverAccess.Camera(settings.AscomProgId);
             camera.Connected = true;
 
             isStarted = true;
