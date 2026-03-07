@@ -45,32 +45,53 @@ dotnet run --project src/SkyWatch.Host
 
 ```bash
 dotnet build SkyWatch.sln          # Build
-dotnet test SkyWatch.sln           # Run all tests
+dotnet test SkyWatch.sln           # Run all tests (119: 111 unit + 8 integration)
 dotnet format SkyWatch.sln         # Fix formatting
 dotnet test --filter "FullyQualifiedName~ClassName.MethodName"  # Single test
 ```
 
+## Replay Tool
+
+The standalone replay tool runs the analysis pipeline against a directory of saved images for threshold tuning and regression testing.
+
+```bash
+dotnet run --project tools/SkyWatch.Tools.Replay -- \
+  --source /path/to/images \
+  --profile myprofile \
+  --output report.json
+```
+
+See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for full usage and options.
+
 ## Project Structure
+
+11 projects across 3 directories:
 
 ```
 src/
-  SkyWatch.Contracts   — Shared interfaces, DTOs, enums (no external dependencies)
-  SkyWatch.Core        — Configuration, logging, common services
-  SkyWatch.Capture     — Frame sources: webcam, RTSP, replay (OpenCvSharp)
-  SkyWatch.Vision      — Frame analysis and sky metrics (OpenCvSharp)
-  SkyWatch.Safety      — Safety evaluation engine, state management
-  SkyWatch.Alpaca      — ASCOM Alpaca SafetyMonitor HTTP API
-  SkyWatch.Web         — Web UI, REST API, SignalR hub
+  SkyWatch.Contracts   -- Shared interfaces, DTOs, enums (no external dependencies)
+  SkyWatch.Core        -- Configuration models, profile management, utilities
+  SkyWatch.Capture     -- Frame sources: USB webcam, RTSP, replay (OpenCvSharp)
+  SkyWatch.Vision      -- Frame analysis pipeline and sky metrics (OpenCvSharp)
+  SkyWatch.Safety      -- Safety evaluation engine, hysteresis, state management
+  SkyWatch.Alpaca      -- ASCOM Alpaca SafetyMonitor HTTP API and discovery
+  SkyWatch.Web         -- Web UI dashboard, preview streaming, settings
+  SkyWatch.Host        -- Application bootstrap, DI wiring, background worker
 
 tests/
-  SkyWatch.Tests              — Unit tests
-  SkyWatch.IntegrationTests   — Integration tests
+  SkyWatch.Tests              -- Unit tests (111 tests)
+  SkyWatch.IntegrationTests   -- Integration and API tests (8 tests)
 
 tools/
-  SkyWatch.Tools.Replay       — Image replay utility for development
+  SkyWatch.Tools.Replay       -- Standalone image replay utility
 ```
 
-See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed design and data flow.
+## Documentation
+
+- [ARCHITECTURE.md](ARCHITECTURE.md) -- internal design, data flow, extension points
+- [docs/CONFIGURATION.md](docs/CONFIGURATION.md) -- complete settings reference with defaults
+- [docs/ALGORITHMS.md](docs/ALGORITHMS.md) -- image analysis and safety decision algorithms
+- [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) -- Windows, Linux, and Raspberry Pi deployment
 
 ## License
 
