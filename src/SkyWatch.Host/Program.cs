@@ -48,3 +48,10 @@ finally
 {
     await Log.CloseAndFlushAsync();
 }
+
+/// <summary>
+/// Entry point for the SkyWatch application. Partial declaration enables access from integration tests.
+/// </summary>
+public partial class Program
+{
+}
