@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
     <ProjectReference Include="..\SkyWatch.Contracts\SkyWatch.Contracts.csproj" />
@@ -6,6 +6,10 @@
     <ProjectReference Include="..\SkyWatch.Safety\SkyWatch.Safety.csproj" />
     <ProjectReference Include="..\SkyWatch.Vision\SkyWatch.Vision.csproj" />
     <ProjectReference Include="..\SkyWatch.Capture\SkyWatch.Capture.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
   <PropertyGroup>
