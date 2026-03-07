@@ -38,6 +38,9 @@ public static class ServiceRegistration
                 .GetAwaiter().GetResult();
         });
 
+        // HTTP client factory (used by Alpaca camera source)
+        services.AddHttpClient("AlpacaCamera");
+
         // Capture
         services.AddSingleton<FrameSourceManager>(sp =>
         {
