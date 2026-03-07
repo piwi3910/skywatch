@@ -20,12 +20,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```bash
 dotnet build SkyWatch.sln
-dotnet run --project SkyWatch.Host
-dotnet test                           # run all tests
-dotnet test SkyWatch.Tests            # unit tests only
+dotnet run --project src/SkyWatch.Host
+dotnet test SkyWatch.sln              # run all tests (119: 111 unit + 8 integration)
+dotnet test tests/SkyWatch.Tests      # unit tests only
+dotnet test tests/SkyWatch.IntegrationTests  # integration tests only
 dotnet test --filter "FullyQualifiedName~ClassName.MethodName"  # single test
-dotnet publish SkyWatch.Host -c Release -r win-x64 --self-contained
-dotnet publish SkyWatch.Host -c Release -r linux-arm64 --self-contained
+dotnet format SkyWatch.sln --verify-no-changes  # check formatting
+dotnet publish src/SkyWatch.Host -c Release -r win-x64 --self-contained
+dotnet publish src/SkyWatch.Host -c Release -r linux-arm64 --self-contained
+
+# Replay tool -- run analysis against saved images
+dotnet run --project tools/SkyWatch.Tools.Replay -- --source <dir> [--profile <name>] [--output <report.json>]
 ```
 
 ## Solution Architecture
@@ -45,10 +50,10 @@ Frame Source -> Preprocessing -> Vision Analysis -> Safety Engine -> Device API 
 | **SkyWatch.Safety** | Rule engine (`ISafetyEvaluator`), hysteresis, debounce, state store. |
 | **SkyWatch.Alpaca** | ASCOM Alpaca SafetyMonitor (and later ObservingConditions) endpoints. |
 | **SkyWatch.Web** | Web UI: dashboard, preview streaming, settings, mask editor, threshold tuning. |
-| **SkyWatch.Host** | Application bootstrap, DI, background workers, platform startup. Entry point. |
-| **SkyWatch.Tests** | Unit tests. |
-| **SkyWatch.IntegrationTests** | End-to-end, replay scenario, and API tests. |
-| **SkyWatch.Tools.Replay** | Standalone tool for replaying images/videos for validation. |
+| **SkyWatch.Host** | Application bootstrap, DI wiring (`ServiceRegistration`), background worker (`SkyWatchWorker`). Entry point. |
+| **SkyWatch.Tests** | Unit tests (111 tests). |
+| **SkyWatch.IntegrationTests** | Integration and API tests (8 tests). |
+| **SkyWatch.Tools.Replay** | Standalone CLI tool for replaying image directories against the analysis pipeline. |
 
 ### Key Interfaces
 
