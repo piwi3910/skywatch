@@ -49,6 +49,21 @@ public sealed class FrameSourceFactoryTests
     }
 
     [Fact]
+    public void CreatesAlpacaCameraFrameSourceForAlpacaType()
+    {
+        var settings = new CaptureSettings
+        {
+            SourceType = FrameSourceType.AlpacaCamera,
+            AlpacaHost = "localhost",
+            AlpacaPort = 11111,
+        };
+
+        var source = FrameSourceFactory.Create(settings, loggerFactoryMock.Object);
+
+        Assert.IsType<AlpacaCameraFrameSource>(source);
+    }
+
+    [Fact]
     public void ThrowsArgumentNullExceptionForNullSettings()
     {
         Assert.Throws<ArgumentNullException>(() =>

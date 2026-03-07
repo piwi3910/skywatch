@@ -43,7 +43,8 @@ public static class ServiceRegistration
         {
             var logger = sp.GetRequiredService<ILogger<FrameSourceManager>>();
             var loggerFactory = sp.GetRequiredService<ILoggerFactory>();
-            var manager = new FrameSourceManager(logger, loggerFactory);
+            var httpClientFactory = sp.GetService<IHttpClientFactory>();
+            var manager = new FrameSourceManager(logger, loggerFactory, httpClientFactory);
             var profile = sp.GetRequiredService<ProfileSettings>();
             manager.InitializeAsync(profile.Capture, CancellationToken.None).GetAwaiter().GetResult();
             return manager;

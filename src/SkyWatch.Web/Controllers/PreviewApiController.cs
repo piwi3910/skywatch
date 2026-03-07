@@ -50,10 +50,39 @@ public sealed partial class PreviewApiController : ControllerBase
 
         LogFrameServed(frame.Width, frame.Height);
 
-        // The frame ImageBytes are raw pixel data. For a real implementation,
-        // this would encode to JPEG via OpenCvSharp. For now, return the raw bytes
-        // as JPEG content type since the capture layer may already provide encoded data.
-        return File(frame.ImageBytes, "image/jpeg");
+        byte[] jpegBytes;
+        if (frame.BitsPerChannel > 8)
+        {
+            // Auto-stretch 16-bit to 8-bit for JPEG preview
+            using var mat = OpenCvSharp.Cv2.ImDecode(
+                frame.ImageBytes,
+                OpenCvSharp.ImreadModes.AnyDepth | OpenCvSharp.ImreadModes.AnyColor);
+            if (mat.Empty())
+            {
+                return NoContent();
+            }
+
+            using var stretched = new OpenCvSharp.Mat();
+            OpenCvSharp.Cv2.MinMaxLoc(mat, out double minVal, out double maxVal);
+            double scale = maxVal > minVal ? 255.0 / (maxVal - minVal) : 1.0;
+            double offset = -minVal * scale;
+            mat.ConvertTo(stretched, OpenCvSharp.MatType.CV_8U, scale, offset);
+
+            OpenCvSharp.Cv2.ImEncode(".jpg", stretched, out jpegBytes);
+        }
+        else
+        {
+            // 8-bit: decode and re-encode as JPEG for consistent output
+            using var mat = OpenCvSharp.Cv2.ImDecode(frame.ImageBytes, OpenCvSharp.ImreadModes.Color);
+            if (mat.Empty())
+            {
+                return File(frame.ImageBytes, "image/jpeg");
+            }
+
+            OpenCvSharp.Cv2.ImEncode(".jpg", mat, out jpegBytes);
+        }
+
+        return File(jpegBytes, "image/jpeg");
     }
 
     [LoggerMessage(Level = LogLevel.Debug, Message = "No frame source registered, returning 204")]
