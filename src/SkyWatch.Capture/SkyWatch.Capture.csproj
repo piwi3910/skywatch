@@ -1,6 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
+    <InternalsVisibleTo Include="SkyWatch.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\SkyWatch.Contracts\SkyWatch.Contracts.csproj" />
     <ProjectReference Include="..\SkyWatch.Core\SkyWatch.Core.csproj" />
   </ItemGroup>
