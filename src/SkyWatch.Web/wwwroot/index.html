@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkyWatch Dashboard</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <header>
+        <h1>SkyWatch</h1>
+        <nav>
+            <button class="tab active" data-tab="dashboard">Dashboard</button>
+            <button class="tab" data-tab="config">Configuration</button>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Dashboard Tab -->
+        <section id="dashboard" class="tab-content active">
+            <div class="status-banner" id="status-banner">
+                <span class="status-indicator" id="status-indicator"></span>
+                <span id="status-text">Loading...</span>
+            </div>
+
+            <div class="grid">
+                <div class="card">
+                    <h3>Live Preview</h3>
+                    <img id="preview-image" src="/api/preview/frame" alt="Sky Preview">
+                </div>
+
+                <div class="card">
+                    <h3>Current Metrics</h3>
+                    <div id="metrics-panel">
+                        <div class="metric"><label>Brightness</label><span id="metric-brightness">--</span></div>
+                        <div class="metric"><label>Star Count</label><span id="metric-stars">--</span></div>
+                        <div class="metric"><label>Cloudiness</label><span id="metric-cloudiness">--</span></div>
+                        <div class="metric"><label>Entropy</label><span id="metric-entropy">--</span></div>
+                        <div class="metric"><label>Edge Density</label><span id="metric-edges">--</span></div>
+                        <div class="metric"><label>Obstruction</label><span id="metric-obstruction">--</span></div>
+                        <div class="metric"><label>Confidence</label><span id="metric-confidence">--</span></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Safety Details</h3>
+                    <div id="safety-details">
+                        <p><strong>State:</strong> <span id="detail-state">--</span></p>
+                        <p><strong>Reasons:</strong> <span id="detail-reasons">--</span></p>
+                        <p><strong>Explanation:</strong> <span id="detail-explanation">--</span></p>
+                        <p><strong>Last Change:</strong> <span id="detail-last-change">--</span></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Configuration Tab -->
+        <section id="config" class="tab-content">
+            <div class="card">
+                <h3>Threshold Settings</h3>
+                <div id="threshold-editor"></div>
+                <button id="save-config" class="btn-primary">Save Configuration</button>
+                <div id="config-status"></div>
+            </div>
+
+            <div class="card">
+                <h3>Profile Management</h3>
+                <select id="profile-select"></select>
+                <button id="activate-profile" class="btn-secondary">Activate</button>
+            </div>
+        </section>
+    </main>
+
+    <script src="/js/dashboard.js"></script>
+    <script src="/js/config.js"></script>
+</body>
+</html>
