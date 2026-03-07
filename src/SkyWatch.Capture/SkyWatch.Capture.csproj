@@ -1,5 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+  <PropertyGroup>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('Windows'))">
+    <DefineConstants>$(DefineConstants);WINDOWS</DefineConstants>
+  </PropertyGroup>
+
   <ItemGroup>
     <InternalsVisibleTo Include="SkyWatch.Tests" />
   </ItemGroup>
@@ -14,6 +22,10 @@
     <PackageReference Include="OpenCvSharp4.runtime.win" Version="4.10.0.20241108" Condition="$([MSBuild]::IsOSPlatform('Windows'))" />
     <PackageReference Include="OpenCvSharp4.runtime.osx_arm64" Version="4.8.1-rc" Condition="$([MSBuild]::IsOSPlatform('OSX'))" />
     <!-- For Linux CI, add OpenCvSharp4.runtime.linux-x64 when needed -->
+  </ItemGroup>
+
+  <ItemGroup Condition="$([MSBuild]::IsOSPlatform('Windows'))">
+    <PackageReference Include="ASCOM.DriverAccess" Version="7.*" />
   </ItemGroup>
 
 </Project>
