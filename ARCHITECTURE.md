@@ -118,7 +118,7 @@ See [docs/ALGORITHMS.md](docs/ALGORITHMS.md) for detailed algorithm descriptions
 
 `SafetyMonitorController` (`src/SkyWatch.Alpaca/Controllers/SafetyMonitorController.cs`) implements the ASCOM Alpaca SafetyMonitor device type (interface version 3):
 
-- **Web/API URL**: configurable via `Urls` in `appsettings.json` (default `http://0.0.0.0:5000`)
+- **Web/API URL**: configurable via `Urls` in `appsettings.json` (default `http://0.0.0.0:5050`)
 - **UDP discovery**: port 32227 (standard Alpaca discovery, configurable)
 - **Device type**: SafetyMonitor, device number 0
 - **Primary endpoint**: `GET /api/v1/safetymonitor/0/issafe`

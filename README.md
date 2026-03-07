@@ -36,8 +36,8 @@ dotnet build SkyWatch.sln
 dotnet run --project src/SkyWatch.Host
 
 # Access
-# Web UI: http://localhost:5000
-# Health: http://localhost:5000/health
+# Web UI: http://localhost:5050
+# Health: http://localhost:5050/health
 # Alpaca: http://localhost:11111/api/v1/safetymonitor/0/issafe
 ```
 

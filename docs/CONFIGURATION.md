@@ -30,7 +30,7 @@ All configuration is managed through JSON files. Application-level settings live
 
 | Setting | Type | Default | Description |
 |---------|------|---------|-------------|
-| `Urls` | string | `"http://0.0.0.0:5000"` | Kestrel listening URL for the web UI and health endpoint. |
+| `Urls` | string | `"http://0.0.0.0:5050"` | Kestrel listening URL for the web UI and health endpoint. |
 
 ## Profile Settings
 
@@ -181,6 +181,6 @@ Masks are a list of rectangular or elliptical regions that are excluded from (or
     }
   },
   "AllowedHosts": "*",
-  "Urls": "http://0.0.0.0:5000"
+  "Urls": "http://0.0.0.0:5050"
 }
 ```
