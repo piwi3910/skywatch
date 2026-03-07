@@ -14,11 +14,12 @@ Primary deployment targets: Windows PC running [NINA](https://nighttime-imaging.
 
 ## Features
 
-- **Camera support** -- USB webcams, RTSP/IP cameras, image replay mode for testing
+- **Camera support** -- USB webcams, RTSP/IP cameras, ASCOM Alpaca cameras, native ASCOM COM cameras (Windows), image replay mode for testing
+- **Exposure control** -- manual exposure with configurable duration, auto-exposure with target brightness/damping/min-max bounds, 16-bit capture with full bit-depth preservation
 - **Safety metrics** -- brightness, star count, cloudiness, entropy, edge density, obstruction detection
 - **Deterministic safety decision engine** -- configurable hysteresis and debounce; asymmetric timing (fast unsafe, slow safe transitions)
 - **ASCOM Alpaca SafetyMonitor** -- standard HTTP API for NINA and other ASCOM clients
-- **Web UI** -- live preview, threshold tuning, mask editing, configuration management
+- **Web UI** -- React + MUI dark-themed dashboard with live preview, real-time metrics via WebSocket, threshold tuning, and full configuration management (no JSON editing needed)
 - **Structured logging** -- Serilog with console and file sinks
 - **Profile-based configuration** -- JSON persistence, multiple profiles
 - **Fail-safe by default** -- unknown or error states are treated as unsafe
@@ -36,16 +37,40 @@ dotnet build SkyWatch.sln
 dotnet run --project src/SkyWatch.Host
 
 # Access
-# Web UI: http://localhost:5000
-# Health: http://localhost:5000/health
+# Web UI: http://localhost:5050
+# Health: http://localhost:5050/health
 # Alpaca: http://localhost:11111/api/v1/safetymonitor/0/issafe
 ```
+
+## Web UI
+
+SkyWatch includes a React + Material UI dark-themed dashboard served by the ASP.NET Core backend on port 5050. All configuration is manageable through the UI -- no JSON editing required.
+
+**Pages:**
+- **Dashboard** -- live camera preview, real-time safety status and sky metrics via WebSocket
+- **Sources** -- configure camera source (USB, RTSP, Alpaca Camera, ASCOM Camera, replay)
+- **Thresholds** -- tune per-metric safe/unsafe thresholds
+- **Timing** -- adjust debounce, hysteresis, and warmup durations
+- **Profiles** -- create, switch, and manage configuration profiles
+- **System** -- application info, logging, and diagnostics
+
+The API is designed for N.I.N.A. plugin compatibility.
 
 ## Development
 
 ```bash
-dotnet build SkyWatch.sln          # Build
-dotnet test SkyWatch.sln           # Run all tests (119: 111 unit + 8 integration)
+# Backend
+dotnet build SkyWatch.sln
+dotnet run --project src/SkyWatch.Host
+
+# Frontend (dev mode with hot reload)
+cd src/SkyWatch.Web/ClientApp
+npm install
+npm run dev
+# Vite dev server runs at http://localhost:5173 with proxy to backend
+
+# Tests
+dotnet test SkyWatch.sln           # Run all tests (153: 145 unit + 8 integration)
 dotnet format SkyWatch.sln         # Fix formatting
 dotnet test --filter "FullyQualifiedName~ClassName.MethodName"  # Single test
 ```
@@ -71,11 +96,11 @@ See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for full usage and options.
 src/
   SkyWatch.Contracts   -- Shared interfaces, DTOs, enums (no external dependencies)
   SkyWatch.Core        -- Configuration models, profile management, utilities
-  SkyWatch.Capture     -- Frame sources: USB webcam, RTSP, replay (OpenCvSharp)
+  SkyWatch.Capture     -- Frame sources: USB webcam, RTSP, Alpaca camera, ASCOM COM camera, replay (OpenCvSharp)
   SkyWatch.Vision      -- Frame analysis pipeline and sky metrics (OpenCvSharp)
   SkyWatch.Safety      -- Safety evaluation engine, hysteresis, state management
   SkyWatch.Alpaca      -- ASCOM Alpaca SafetyMonitor HTTP API and discovery
-  SkyWatch.Web         -- Web UI dashboard, preview streaming, settings
+  SkyWatch.Web         -- React + MUI SPA, WebSocket live streaming, REST API
   SkyWatch.Host        -- Application bootstrap, DI wiring, background worker
 
 tests/

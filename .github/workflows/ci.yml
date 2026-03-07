@@ -30,12 +30,16 @@ jobs:
       - name: Format check
         run: dotnet format SkyWatch.sln --verify-no-changes --no-restore
 
+      # Tests run on Windows only — OpenCvSharp native libraries (OpenCvSharpExtern)
+      # require platform-specific runtime packages and system dependencies that are
+      # not reliably available on ubuntu-latest GitHub runners.
       - name: Test
+        if: runner.os == 'Windows'
         run: dotnet test SkyWatch.sln --no-build -c Release --logger "trx;LogFileName=test-results.trx"
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
-        if: always()
+        if: always() && runner.os == 'Windows'
         with:
           name: test-results-${{ matrix.os }}
           path: '**/TestResults/*.trx'

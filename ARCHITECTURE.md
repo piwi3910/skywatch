@@ -5,10 +5,12 @@ This document describes the internal architecture of SkyWatch. For setup and usa
 ## Pipeline Overview
 
 ```
-Frame Source -> Preprocessing -> Vision Analysis -> Safety Engine -> Device API -> Clients/UI
+Frame Source -> FrameSourceManager -> Preprocessing -> Vision Analysis -> Safety Engine -> Device API -> Clients/UI
 ```
 
-A camera frame is captured by `SkyWatchWorker`, analyzed for sky metrics by `FrameAnalyzerPipeline`, evaluated against safety thresholds by `SafetyEvaluatorEngine`, and the resulting safe/unsafe state is exposed via the ASCOM Alpaca API and the web UI.
+A camera frame is captured by `SkyWatchWorker` via `FrameSourceManager`, analyzed for sky metrics by `FrameAnalyzerPipeline`, evaluated against safety thresholds by `SafetyEvaluatorEngine`, and the resulting safe/unsafe state is exposed via the ASCOM Alpaca API and the web UI.
+
+`FrameSourceManager` wraps `IFrameSource` and enables live source switching at runtime without restarting the application.
 
 ## Project Dependency Graph
 
@@ -25,7 +27,7 @@ SkyWatch.Contracts          (no dependencies)
         |     |
         |     +-- SkyWatch.Alpaca
         |
-        +-- SkyWatch.Web       (+ Safety, Vision, Capture)
+        +-- SkyWatch.Web       (+ Safety, Vision, Capture; React + MUI + Vite SPA)
 
 SkyWatch.Host               (all projects -- composition root)
 ```
@@ -61,6 +63,7 @@ FrameData  ->  FrameAnalysisResult (SkyMetrics)  ->  SafetyEvaluation
 | Interface | Project | Implementation | Responsibility |
 |-----------|---------|---------------|----------------|
 | `IFrameSource` | Contracts | `UsbCameraSource`, `RtspFrameSource`, `ReplayFrameSource` | Produces camera frames (`FrameData`) |
+| `FrameSourceManager` | Capture | (wraps `IFrameSource`) | Manages active frame source, enables live source switching |
 | `IFrameAnalyzer` | Contracts | `FrameAnalyzerPipeline` | Analyzes frames into `FrameAnalysisResult` with `SkyMetrics` |
 | `ISafetyEvaluator` | Contracts | `SafetyEvaluatorEngine` | Evaluates metrics against thresholds, applies hysteresis |
 | `ISafetyStateStore` | Contracts | `SafetyStateStore` | Holds current safety state, fires change events |
@@ -118,13 +121,44 @@ See [docs/ALGORITHMS.md](docs/ALGORITHMS.md) for detailed algorithm descriptions
 
 `SafetyMonitorController` (`src/SkyWatch.Alpaca/Controllers/SafetyMonitorController.cs`) implements the ASCOM Alpaca SafetyMonitor device type (interface version 3):
 
-- **Web/API URL**: configurable via `Urls` in `appsettings.json` (default `http://0.0.0.0:5000`)
+- **Web/API URL**: configurable via `Urls` in `appsettings.json` (default `http://0.0.0.0:5050`)
 - **UDP discovery**: port 32227 (standard Alpaca discovery, configurable)
 - **Device type**: SafetyMonitor, device number 0
 - **Primary endpoint**: `GET /api/v1/safetymonitor/0/issafe`
 - **Other endpoints**: `connected`, `connecting`, `connect`, `disconnect`, `description`, `devicestate`, `driverinfo`, `driverversion`, `interfaceversion`, `name`, `supportedactions`, `action`, `commandblind`, `commandbool`, `commandstring`
 
 Any ASCOM Alpaca client (NINA, SGPro, Voyager, etc.) can discover and query SkyWatch as a standard SafetyMonitor device.
+
+## Web UI -- React SPA
+
+The web interface is a React + Material UI single-page application built with Vite. In production, the SPA is compiled to static files and served by the ASP.NET Core backend. In development, the Vite dev server (port 5173) proxies API requests to the backend (port 5050).
+
+The SPA provides six pages: Dashboard, Sources, Thresholds, Timing, Profiles, and System. All configuration can be managed through the UI without editing JSON files.
+
+The REST API is designed for N.I.N.A. plugin compatibility, exposing endpoints for capture settings, threshold management, timing configuration, and manual safety overrides.
+
+**API endpoints** (beyond Alpaca):
+
+| Endpoint | Method | Purpose |
+|----------|--------|---------|
+| `/api/capture` | GET/PUT | Camera source configuration |
+| `/api/thresholds` | GET/PUT | Per-metric safe/unsafe thresholds |
+| `/api/timing` | GET/PUT | Debounce, hysteresis, warmup settings |
+| `/api/override` | GET/PUT | Manual safety override mode |
+| `/api/profiles` | GET/POST/DELETE | Profile management |
+| `/api/status` | GET | Current safety state and metrics |
+| `/ws/live` | WebSocket | Real-time streaming (see below) |
+
+## Real-time Communication
+
+SkyWatch uses a WebSocket endpoint at `/ws/live` for real-time data streaming to the web UI. The WebSocket pushes:
+
+- Current safety state and evaluation details
+- Live sky metrics (brightness, star count, cloudiness, entropy, edge density, obstruction score)
+- Camera frame preview (base64-encoded JPEG)
+- State transition events
+
+This provides low-latency updates without polling, enabling the dashboard to display a live camera preview and real-time metric charts.
 
 ## Extension Points
 

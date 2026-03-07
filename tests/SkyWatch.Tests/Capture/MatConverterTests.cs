@@ -33,6 +33,8 @@ public sealed class MatConverterTests
             Width = 90,
             Height = 60,
             Channels = 3,
+            BitsPerChannel = 8,
+            PixelFormat = "BGR24",
             CapturedAt = DateTimeOffset.UtcNow,
             SourceType = FrameSourceType.Replay,
         };
@@ -85,5 +87,68 @@ public sealed class MatConverterTests
         var frameData = MatConverter.MatToFrameData(mat, FrameSourceType.Rtsp);
 
         Assert.Equal(FrameSourceType.Rtsp, frameData.SourceType);
+    }
+
+    [Fact]
+    public void MatToFrameDataHandles16BitMono()
+    {
+        using var mat = new Mat(40, 60, MatType.CV_16UC1, new Scalar(30000));
+
+        var frameData = MatConverter.MatToFrameData(mat, FrameSourceType.AlpacaCamera);
+
+        Assert.Equal(60, frameData.Width);
+        Assert.Equal(40, frameData.Height);
+        Assert.Equal(1, frameData.Channels);
+        Assert.Equal(16, frameData.BitsPerChannel);
+        Assert.Equal("Mono16", frameData.PixelFormat);
+    }
+
+    [Fact]
+    public void MatToFrameDataHandles8BitMono()
+    {
+        using var mat = new Mat(40, 60, MatType.CV_8UC1, new Scalar(128));
+
+        var frameData = MatConverter.MatToFrameData(mat, FrameSourceType.AlpacaCamera);
+
+        Assert.Equal(1, frameData.Channels);
+        Assert.Equal(8, frameData.BitsPerChannel);
+        Assert.Equal("Mono8", frameData.PixelFormat);
+    }
+
+    [Fact]
+    public void MatToFrameDataHandles8BitBGR()
+    {
+        using var mat = new Mat(40, 60, MatType.CV_8UC3, new Scalar(100, 150, 200));
+
+        var frameData = MatConverter.MatToFrameData(mat, FrameSourceType.UsbCamera);
+
+        Assert.Equal(3, frameData.Channels);
+        Assert.Equal(8, frameData.BitsPerChannel);
+        Assert.Equal("BGR24", frameData.PixelFormat);
+    }
+
+    [Fact]
+    public void FrameDataToMatHandles16BitFlag()
+    {
+        using var original = new Mat(30, 40, MatType.CV_16UC1, new Scalar(10000));
+        Cv2.ImEncode(".png", original, out var pngBytes);
+
+        var frameData = new FrameData
+        {
+            ImageBytes = pngBytes,
+            Width = 40,
+            Height = 30,
+            Channels = 1,
+            BitsPerChannel = 16,
+            PixelFormat = "Mono16",
+            CapturedAt = DateTimeOffset.UtcNow,
+            SourceType = FrameSourceType.AlpacaCamera,
+        };
+
+        using var decoded = MatConverter.FrameDataToMat(frameData);
+
+        Assert.Equal(40, decoded.Width);
+        Assert.Equal(30, decoded.Height);
+        Assert.Equal(MatType.CV_16UC1, decoded.Type());
     }
 }

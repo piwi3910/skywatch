@@ -38,13 +38,21 @@ public static class ServiceRegistration
                 .GetAwaiter().GetResult();
         });
 
+        // HTTP client factory (used by Alpaca camera source)
+        services.AddHttpClient("AlpacaCamera");
+
         // Capture
-        services.AddSingleton<IFrameSource>(sp =>
+        services.AddSingleton<FrameSourceManager>(sp =>
         {
-            var profile = sp.GetRequiredService<ProfileSettings>();
+            var logger = sp.GetRequiredService<ILogger<FrameSourceManager>>();
             var loggerFactory = sp.GetRequiredService<ILoggerFactory>();
-            return FrameSourceFactory.Create(profile.Capture, loggerFactory);
+            var httpClientFactory = sp.GetService<IHttpClientFactory>();
+            var manager = new FrameSourceManager(logger, loggerFactory, httpClientFactory);
+            var profile = sp.GetRequiredService<ProfileSettings>();
+            manager.InitializeAsync(profile.Capture, CancellationToken.None).GetAwaiter().GetResult();
+            return manager;
         });
+        services.AddSingleton<IFrameSource>(sp => sp.GetRequiredService<FrameSourceManager>());
 
         // Vision
         services.AddSingleton<IFrameAnalyzer>(sp =>

@@ -9,7 +9,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Technology Stack
 
 - **Language:** C# on .NET 8
-- **API/Web:** ASP.NET Core (Razor Pages or Blazor Server for UI)
+- **API/Web:** ASP.NET Core backend, React + Material UI + Vite frontend SPA
 - **Image Processing:** OpenCvSharp
 - **Logging:** Serilog (structured logging)
 - **Serialization:** System.Text.Json
@@ -21,7 +21,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```bash
 dotnet build SkyWatch.sln
 dotnet run --project src/SkyWatch.Host
-dotnet test SkyWatch.sln              # run all tests (119: 111 unit + 8 integration)
+dotnet test SkyWatch.sln              # run all tests (153: 145 unit + 8 integration)
 dotnet test tests/SkyWatch.Tests      # unit tests only
 dotnet test tests/SkyWatch.IntegrationTests  # integration tests only
 dotnet test --filter "FullyQualifiedName~ClassName.MethodName"  # single test
@@ -31,12 +31,18 @@ dotnet publish src/SkyWatch.Host -c Release -r linux-arm64 --self-contained
 
 # Replay tool -- run analysis against saved images
 dotnet run --project tools/SkyWatch.Tools.Replay -- --source <dir> [--profile <name>] [--output <report.json>]
+
+# Frontend dev server (hot reload, proxies to backend on port 5050)
+cd src/SkyWatch.Web/ClientApp && npm install && npm run dev
+
+# Frontend production build (output served by ASP.NET Core)
+cd src/SkyWatch.Web/ClientApp && npm run build
 ```
 
 ## Solution Architecture
 
 ```
-Frame Source -> Preprocessing -> Vision Analysis -> Safety Engine -> Device API -> Clients/UI
+Frame Source -> FrameSourceManager -> Preprocessing -> Vision Analysis -> Safety Engine -> Device API -> Clients/UI
 ```
 
 ### Projects and Responsibilities
@@ -45,13 +51,13 @@ Frame Source -> Preprocessing -> Vision Analysis -> Safety Engine -> Device API 
 |---------|------|
 | **SkyWatch.Contracts** | Shared DTOs, interfaces, enums, state models. No dependencies on other projects. |
 | **SkyWatch.Core** | Configuration models, utilities, validation, constants, profile logic. |
-| **SkyWatch.Capture** | Frame source abstraction (`IFrameSource`) and implementations (USB, RTSP, Replay). |
+| **SkyWatch.Capture** | Frame source abstraction (`IFrameSource`) and implementations (USB, RTSP, Replay, `AlpacaCameraFrameSource`, `AscomComCameraFrameSource`). |
 | **SkyWatch.Vision** | Image analysis (`IFrameAnalyzer`): brightness, star count, cloudiness, entropy, edge density, obstruction. |
 | **SkyWatch.Safety** | Rule engine (`ISafetyEvaluator`), hysteresis, debounce, state store. |
 | **SkyWatch.Alpaca** | ASCOM Alpaca SafetyMonitor (and later ObservingConditions) endpoints. |
-| **SkyWatch.Web** | Web UI: dashboard, preview streaming, settings, mask editor, threshold tuning. |
+| **SkyWatch.Web** | React + MUI SPA: dashboard, live preview via WebSocket (`/ws/live`), settings, threshold tuning. API-first design for N.I.N.A. plugin compatibility. |
 | **SkyWatch.Host** | Application bootstrap, DI wiring (`ServiceRegistration`), background worker (`SkyWatchWorker`). Entry point. |
-| **SkyWatch.Tests** | Unit tests (111 tests). |
+| **SkyWatch.Tests** | Unit tests (145 tests). |
 | **SkyWatch.IntegrationTests** | Integration and API tests (8 tests). |
 | **SkyWatch.Tools.Replay** | Standalone CLI tool for replaying image directories against the analysis pipeline. |
 
