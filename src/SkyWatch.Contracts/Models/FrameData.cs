@@ -1,4 +1,4 @@
-using SkyWatch.Contracts.Enums;
+﻿using SkyWatch.Contracts.Enums;
 
 namespace SkyWatch.Contracts.Models;
 
