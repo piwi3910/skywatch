@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -e
+
+# Only check if there are staged .cs files
+STAGED_CS=$(git diff --cached --name-only --diff-filter=ACM | grep '\.cs$' || true)
+if [ -z "$STAGED_CS" ]; then
+    exit 0
+fi
+
+echo "Running dotnet format check on staged files..."
+dotnet format SkyWatch.sln --verify-no-changes --verbosity quiet
+FORMAT_EXIT=$?
+
+if [ $FORMAT_EXIT -ne 0 ]; then
+    echo ""
+    echo "ERROR: Code formatting issues detected."
+    echo "Run 'dotnet format SkyWatch.sln' to fix them, then re-stage and commit."
+    exit 1
+fi
+
+echo "Format check passed."
