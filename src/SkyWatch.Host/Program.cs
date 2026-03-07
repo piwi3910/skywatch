@@ -1,6 +1,7 @@
 ﻿using System.Globalization;
 using Serilog;
-using SkyWatch.Core.Configuration;
+using SkyWatch.Host.Extensions;
+using SkyWatch.Web.Extensions;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console(formatProvider: CultureInfo.InvariantCulture)
@@ -26,14 +27,14 @@ try
             retainedFileCountLimit: 30,
             formatProvider: CultureInfo.InvariantCulture));
 
-    builder.Services.Configure<SkyWatchOptions>(
-        builder.Configuration.GetSection(SkyWatchOptions.SectionName));
-
-    builder.Services.AddSingleton<ProfileManager>();
+    // Register all SkyWatch services
+    builder.Services.AddSkyWatchServices(builder.Configuration);
 
     var app = builder.Build();
 
     app.UseSerilogRequestLogging();
+    app.UseSkyWatchWeb();
+    app.MapControllers();
 
     app.MapGet("/health", () => Results.Ok(new { Status = "Healthy", Timestamp = DateTimeOffset.UtcNow }));
 
