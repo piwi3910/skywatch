@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Net.Http;
+using Microsoft.Extensions.Logging;
 using SkyWatch.Contracts.Enums;
 using SkyWatch.Contracts.Interfaces;
 using SkyWatch.Contracts.Models;
@@ -25,8 +26,9 @@ public sealed partial class FrameSourceManager : IFrameSource
     /// </summary>
     /// <param name="logger">The logger instance.</param>
     /// <param name="loggerFactory">The logger factory for creating sources.</param>
-    public FrameSourceManager(ILogger<FrameSourceManager> logger, ILoggerFactory loggerFactory)
-        : this(logger, loggerFactory, settings => FrameSourceFactory.Create(settings, loggerFactory))
+    /// <param name="httpClientFactory">An optional HTTP client factory for Alpaca camera sources.</param>
+    public FrameSourceManager(ILogger<FrameSourceManager> logger, ILoggerFactory loggerFactory, IHttpClientFactory? httpClientFactory = null)
+        : this(logger, loggerFactory, settings => FrameSourceFactory.Create(settings, loggerFactory, httpClientFactory))
     {
     }
 
