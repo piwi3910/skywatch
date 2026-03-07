@@ -39,12 +39,16 @@ public static class ServiceRegistration
         });
 
         // Capture
-        services.AddSingleton<IFrameSource>(sp =>
+        services.AddSingleton<FrameSourceManager>(sp =>
         {
-            var profile = sp.GetRequiredService<ProfileSettings>();
+            var logger = sp.GetRequiredService<ILogger<FrameSourceManager>>();
             var loggerFactory = sp.GetRequiredService<ILoggerFactory>();
-            return FrameSourceFactory.Create(profile.Capture, loggerFactory);
+            var manager = new FrameSourceManager(logger, loggerFactory);
+            var profile = sp.GetRequiredService<ProfileSettings>();
+            manager.InitializeAsync(profile.Capture, CancellationToken.None).GetAwaiter().GetResult();
+            return manager;
         });
+        services.AddSingleton<IFrameSource>(sp => sp.GetRequiredService<FrameSourceManager>());
 
         // Vision
         services.AddSingleton<IFrameAnalyzer>(sp =>
