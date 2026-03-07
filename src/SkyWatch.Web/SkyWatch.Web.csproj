@@ -1,5 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <SpaRoot>ClientApp</SpaRoot>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\SkyWatch.Contracts\SkyWatch.Contracts.csproj" />
     <ProjectReference Include="..\SkyWatch.Core\SkyWatch.Core.csproj" />
@@ -12,10 +19,18 @@
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
+  <ItemGroup>
+    <Content Include="wwwroot\**" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Remove="$(SpaRoot)\**" />
+    <None Include="$(SpaRoot)\**" Exclude="$(SpaRoot)\node_modules\**;$(SpaRoot)\dist\**" />
+  </ItemGroup>
+
+  <Target Name="PublishClientApp" AfterTargets="ComputeFilesToPublish" Condition="Exists('$(SpaRoot)/package.json')">
+    <Exec Command="npm install --prefer-offline" WorkingDirectory="$(SpaRoot)" />
+    <Exec Command="npm run build" WorkingDirectory="$(SpaRoot)" />
+  </Target>
 
 </Project>

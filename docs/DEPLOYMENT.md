@@ -42,7 +42,7 @@ cd publish
 .\SkyWatch.Host.exe
 ```
 
-The web UI is available at `http://localhost:5000` and the Alpaca API at `http://localhost:5000/api/v1/safetymonitor/0/issafe`. Alpaca discovery runs on UDP port 32227.
+The web UI is available at `http://localhost:5050` and the Alpaca API at `http://localhost:5050/api/v1/safetymonitor/0/issafe`. Alpaca discovery runs on UDP port 32227.
 
 ### Running as a Windows Service
 
@@ -62,11 +62,11 @@ sc.exe start SkyWatch
 ### Firewall
 
 Allow inbound connections on:
-- TCP port 5000 (web UI)
+- TCP port 5050 (web UI)
 - UDP port 32227 (Alpaca discovery)
 
 ```powershell
-netsh advfirewall firewall add rule name="SkyWatch Web" dir=in action=allow protocol=tcp localport=5000
+netsh advfirewall firewall add rule name="SkyWatch Web" dir=in action=allow protocol=tcp localport=5050
 netsh advfirewall firewall add rule name="SkyWatch Alpaca Discovery" dir=in action=allow protocol=udp localport=32227
 ```
 
@@ -117,7 +117,7 @@ sudo systemctl status skywatch
 ### Firewall (ufw)
 
 ```bash
-sudo ufw allow 5000/tcp    # Web UI
+sudo ufw allow 5050/tcp    # Web UI
 sudo ufw allow 32227/udp   # Alpaca discovery
 ```
 
@@ -179,7 +179,7 @@ Options:
 3. If Alpaca discovery is enabled (default), SkyWatch should appear automatically in the device list as "SkyWatch SafetyMonitor".
 4. If discovery does not work, add a manual Alpaca device:
    - Host: the IP address of the SkyWatch machine
-   - Port: 5000 (or whatever `Urls` is configured to in `appsettings.json`)
+   - Port: 5050 (or whatever `Urls` is configured to in `appsettings.json`)
    - Device type: SafetyMonitor
    - Device number: 0
 5. Connect the device. NINA will poll `GET /api/v1/safetymonitor/0/issafe` to check safety status.
