@@ -1,4 +1,4 @@
-﻿using OpenCvSharp;
+using OpenCvSharp;
 using SkyWatch.Contracts.Enums;
 using SkyWatch.Contracts.Models;
 
@@ -21,6 +21,7 @@ public static class MatConverter
 
         Cv2.ImEncode(".png", mat, out var imageBytes);
 
+        int channels = mat.Channels();
         int bitsPerChannel = mat.Depth() switch
         {
             MatType.CV_8U => 8,
@@ -28,14 +29,14 @@ public static class MatConverter
             _ => 8,
         };
 
-        string pixelFormat = (mat.Channels(), bitsPerChannel) switch
+        string pixelFormat = (channels, bitsPerChannel) switch
         {
             (1, 8) => "Mono8",
             (1, 16) => "Mono16",
             (3, 8) => "BGR24",
             (3, 16) => "BGR48",
             (4, 8) => "BGRA32",
-            _ => $"Unknown{mat.Channels()}ch{bitsPerChannel}bit",
+            _ => $"Unknown{channels}ch{bitsPerChannel}bit",
         };
 
         return new FrameData
@@ -43,7 +44,7 @@ public static class MatConverter
             ImageBytes = imageBytes,
             Width = mat.Width,
             Height = mat.Height,
-            Channels = mat.Channels(),
+            Channels = channels,
             BitsPerChannel = bitsPerChannel,
             PixelFormat = pixelFormat,
             CapturedAt = DateTimeOffset.UtcNow,
@@ -61,6 +62,10 @@ public static class MatConverter
     {
         ArgumentNullException.ThrowIfNull(frame);
 
-        return Cv2.ImDecode(frame.ImageBytes, ImreadModes.Color);
+        var mode = frame.BitsPerChannel > 8
+            ? ImreadModes.AnyDepth | ImreadModes.AnyColor
+            : ImreadModes.Color;
+
+        return Cv2.ImDecode(frame.ImageBytes, mode);
     }
 }
