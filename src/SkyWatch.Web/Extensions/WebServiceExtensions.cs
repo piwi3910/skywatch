@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using SkyWatch.Web.Controllers;
+using SkyWatch.Web.WebSocket;
 
 namespace SkyWatch.Web.Extensions;
 
@@ -16,6 +18,8 @@ public static class WebServiceExtensions
     /// <returns>The service collection for chaining.</returns>
     public static IServiceCollection AddSkyWatchWeb(this IServiceCollection services)
     {
+        services.AddSingleton<WebSocketConnectionManager>();
+        services.AddSingleton<SkyWatchWebSocketHandler>();
         services.AddControllers()
             .AddApplicationPart(typeof(DashboardApiController).Assembly);
         return services;
@@ -28,6 +32,20 @@ public static class WebServiceExtensions
     /// <returns>The application builder for chaining.</returns>
     public static IApplicationBuilder UseSkyWatchWeb(this IApplicationBuilder app)
     {
+        app.UseWebSockets();
+        app.Use(async (context, next) =>
+        {
+            if (context.Request.Path == "/ws/live")
+            {
+                var handler = context.RequestServices.GetRequiredService<SkyWatchWebSocketHandler>();
+                await handler.HandleAsync(context);
+            }
+            else
+            {
+                await next(context);
+            }
+        });
+
         app.UseDefaultFiles();
         app.UseStaticFiles();
         return app;

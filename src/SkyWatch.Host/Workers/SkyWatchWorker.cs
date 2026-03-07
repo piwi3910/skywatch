@@ -1,7 +1,10 @@
-﻿using SkyWatch.Contracts.Enums;
+﻿using System.Text.Json;
+using System.Text.Json.Serialization;
+using SkyWatch.Contracts.Enums;
 using SkyWatch.Contracts.Interfaces;
 using SkyWatch.Contracts.Models;
 using SkyWatch.Core.Configuration;
+using SkyWatch.Web.WebSocket;
 
 namespace SkyWatch.Host.Workers;
 
@@ -10,10 +13,17 @@ namespace SkyWatch.Host.Workers;
 /// </summary>
 public sealed partial class SkyWatchWorker : BackgroundService
 {
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) },
+    };
+
     private readonly IFrameSource frameSource;
     private readonly IFrameAnalyzer frameAnalyzer;
     private readonly ISafetyEvaluator safetyEvaluator;
     private readonly ISafetyStateStore stateStore;
+    private readonly WebSocketConnectionManager webSocketManager;
     private readonly ProfileSettings profileSettings;
     private readonly ILogger<SkyWatchWorker> logger;
 
@@ -24,6 +34,7 @@ public sealed partial class SkyWatchWorker : BackgroundService
     /// <param name="frameAnalyzer">The frame analyzer for processing images.</param>
     /// <param name="safetyEvaluator">The safety evaluator for determining sky safety.</param>
     /// <param name="stateStore">The state store for tracking current safety state.</param>
+    /// <param name="webSocketManager">The WebSocket connection manager for broadcasting updates.</param>
     /// <param name="profileSettings">The active profile settings.</param>
     /// <param name="logger">The logger instance.</param>
     public SkyWatchWorker(
@@ -31,6 +42,7 @@ public sealed partial class SkyWatchWorker : BackgroundService
         IFrameAnalyzer frameAnalyzer,
         ISafetyEvaluator safetyEvaluator,
         ISafetyStateStore stateStore,
+        WebSocketConnectionManager webSocketManager,
         ProfileSettings profileSettings,
         ILogger<SkyWatchWorker> logger)
     {
@@ -38,6 +50,7 @@ public sealed partial class SkyWatchWorker : BackgroundService
         this.frameAnalyzer = frameAnalyzer;
         this.safetyEvaluator = safetyEvaluator;
         this.stateStore = stateStore;
+        this.webSocketManager = webSocketManager;
         this.profileSettings = profileSettings;
         this.logger = logger;
 
@@ -80,6 +93,7 @@ public sealed partial class SkyWatchWorker : BackgroundService
                     {
                         var failSafeEval = CreateCameraErrorEvaluation(DateTimeOffset.UtcNow);
                         stateStore.Update(failSafeEval);
+                        await BroadcastStatusAsync(failSafeEval, null, captureStatus, stoppingToken);
                     }
 
                     continue;
@@ -88,6 +102,12 @@ public sealed partial class SkyWatchWorker : BackgroundService
                 var analysis = await frameAnalyzer.AnalyzeAsync(frame, stoppingToken);
                 var evaluation = safetyEvaluator.Evaluate(analysis, DateTimeOffset.UtcNow);
                 stateStore.Update(evaluation);
+                await BroadcastStatusAsync(evaluation, analysis, frameSource.GetStatus(), stoppingToken);
+
+                if (webSocketManager.ConnectionCount > 0)
+                {
+                    await webSocketManager.BroadcastBinaryAsync(frame.ImageBytes, stoppingToken);
+                }
             }
             catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
             {
@@ -109,6 +129,52 @@ public sealed partial class SkyWatchWorker : BackgroundService
         Explanation = "Camera disconnected - fail-safe activated",
         EvaluatedAt = now,
     };
+
+    private async Task BroadcastStatusAsync(
+        SafetyEvaluation evaluation,
+        FrameAnalysisResult? analysis,
+        CaptureStatus captureStatus,
+        CancellationToken cancellationToken)
+    {
+        if (webSocketManager.ConnectionCount <= 0)
+        {
+            return;
+        }
+
+        var statusMessage = new
+        {
+            type = "status",
+            data = new
+            {
+                safetyState = evaluation.State.ToString(),
+                evaluation.IsSafe,
+                reasons = evaluation.Reasons.ToString(),
+                evaluation.Confidence,
+                evaluation.Explanation,
+                metrics = analysis is null
+                    ? null
+                    : new
+                    {
+                        brightness = analysis.Metrics.AverageBrightness,
+                        starCount = analysis.Metrics.StarCount,
+                        cloudiness = analysis.Metrics.CloudinessScore,
+                        entropy = analysis.Metrics.Entropy,
+                        edgeDensity = analysis.Metrics.EdgeDensity,
+                        obstructionScore = analysis.Metrics.ObstructionScore,
+                    },
+                capture = new
+                {
+                    captureStatus.IsConnected,
+                    sourceType = captureStatus.SourceType.ToString(),
+                    captureStatus.FramesCaptured,
+                    captureStatus.ErrorMessage,
+                },
+            },
+        };
+
+        var json = JsonSerializer.Serialize(statusMessage, JsonOptions);
+        await webSocketManager.BroadcastTextAsync(json, cancellationToken);
+    }
 
     private void OnStateChanged(object? sender, SafetyEvaluation evaluation)
     {
