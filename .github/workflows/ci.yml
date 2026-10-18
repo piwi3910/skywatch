@@ -3,15 +3,20 @@ name: CI
 on:
   push:
     branches: [main]
+    tags: ["v*"]
   pull_request:
     branches: [main]
+  # Integration tier: the Windows OS-matrix leg runs here, never on a PR.
+  schedule:
+    - cron: "17 2 * * *"
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest]
 
     steps:
       - uses: actions/checkout@v4
@@ -30,16 +35,34 @@ jobs:
       - name: Format check
         run: dotnet format SkyWatch.sln --verify-no-changes --no-restore
 
-      # Tests run on Windows only — OpenCvSharp native libraries (OpenCvSharpExtern)
-      # require platform-specific runtime packages and system dependencies that are
-      # not reliably available on ubuntu-latest GitHub runners.
+  # The Windows OS-matrix leg of the full tier. Tests only run on Windows —
+  # OpenCvSharp native libraries (OpenCvSharpExtern) require platform-specific
+  # runtime packages and system dependencies that are not reliably available on
+  # ubuntu-latest runners — and a Windows runner is too slow for a PR gate.
+  test-windows:
+    name: test (windows-latest)
+    runs-on: windows-latest
+    if: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/v') }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore
+        run: dotnet restore SkyWatch.sln
+
+      - name: Build
+        run: dotnet build SkyWatch.sln --no-restore -c Release
+
       - name: Test
-        if: runner.os == 'Windows'
         run: dotnet test SkyWatch.sln --no-build -c Release --logger "trx;LogFileName=test-results.trx"
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
-        if: always() && runner.os == 'Windows'
+        if: always()
         with:
-          name: test-results-${{ matrix.os }}
+          name: test-results-windows-latest
           path: '**/TestResults/*.trx'
